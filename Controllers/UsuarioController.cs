@@ -6,7 +6,7 @@ namespace tl2_tp09_2023_adanSmith01.Controllers;
 public class UsuarioController : ControllerBase
 {
     private readonly ILogger<UsuarioController> _logger;
-    private UsuarioRepository usuarioRepo;
+    private IUsuarioRepository usuarioRepo;
     public UsuarioController(ILogger<UsuarioController> logger)
     {
         _logger = logger;
@@ -15,9 +15,23 @@ public class UsuarioController : ControllerBase
 
     [HttpGet("/api/usuario")]
     public ActionResult<IEnumerable<Usuario>> GetUsuarios(){
-        return Ok(usuarioRepo.GetAllUsuarios());
+        var usuarios = usuarioRepo.GetAllUsuarios();
+        if(usuarios.Count != 0) return Ok(usuarios);
+        else return BadRequest("No hay usuarios registrados");
     }
-    // El controlador, por ahora, revisa que la informacion recibida desde el usuario sea valida
+
+    [HttpGet]
+    [Route("/api/usuario/{id}")]
+    public ActionResult<Usuario> GetUsuarioPorId(int id){
+        var usuarioEncontrado = usuarioRepo.GetUsuario(id);
+
+        if(String.IsNullOrEmpty(usuarioEncontrado.NombreUsuario)){
+            return NotFound("Usuario no encontrado.");
+        }else{
+            return Ok(usuarioEncontrado);
+        }
+    }
+    
     [HttpPost("/api/usuario")]
     public ActionResult<string> CrearUsuario(Usuario nuevoUsuario){
         if(nuevoUsuario != null){
@@ -25,6 +39,16 @@ public class UsuarioController : ControllerBase
             return Ok("Se creo el usuario correctamente.");
         } else{
             return BadRequest("ERROR. No se pudo crear un nuevo usuario.");
+        }
+    }
+
+    [HttpPut("/api/usuario/{id}")]
+    public ActionResult<string> ActualizarUsuario(int id, Usuario usuarioModificar){
+        if(usuarioModificar != null){
+            usuarioRepo.ModificarUsuario(id, usuarioModificar);
+            return Ok("Actualizacion de datos de usuario realizado correctamente");
+        } else{
+            return BadRequest("ERROR. La actualizacion no pudo completarse");
         }
     }
 }
