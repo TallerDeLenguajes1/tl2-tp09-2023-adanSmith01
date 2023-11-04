@@ -1,17 +1,17 @@
 using System.Data.SQLite;
 namespace tl2_tp09_2023_adanSmith01;
 
-public class UsuarioRepository
+public class UsuarioRepository: IUsuarioRepository
 {
     private string connectionString = @"Data Source = DB/kanban.sqlite;Initial Catalog=Northwind;" + "Integrated Security=true";
 
 
     public void CrearNuevoUsuario(Usuario nuevoUsuario){
-        using(SQLiteConnection connection = new SQLiteConnection(connectionString))
+        using(var connection = new SQLiteConnection(connectionString))
         {
             connection.Open();
             
-            string queryString = @"INSERT INTO Usuario (nombre_de_usuario) VALUES (@nombreUsuario)";
+            string queryString = @"INSERT INTO Usuario (nombre_de_usuario) VALUES (@nombreUsuario);";
             var command = new SQLiteCommand(queryString, connection);
 
             command.Parameters.Add(new SQLiteParameter("@nombreUsuario", nuevoUsuario.NombreUsuario));
@@ -20,9 +20,24 @@ public class UsuarioRepository
         }
     }
 
+    public void ModificarUsuario(int idUsuario, Usuario usuarioModificar){
+        using(var connection = new SQLiteConnection(connectionString))
+        {
+            connection.Open();
+
+            string queryString = @"UPDATE Usuario SET nombre_de_usuario = @nombreNuevo WHERE id = @idUsuario;";
+            var command = new SQLiteCommand(queryString, connection);
+
+            command.Parameters.Add(new SQLiteParameter("@idUsuario", idUsuario));
+            command.Parameters.Add(new SQLiteParameter("@nombreNuevo", usuarioModificar.NombreUsuario));
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+    }
+
     public List<Usuario> GetAllUsuarios(){
         List<Usuario> usuarios = new List<Usuario>();
-        using(SQLiteConnection connection = new SQLiteConnection(connectionString))
+        using(var connection = new SQLiteConnection(connectionString))
         {
             connection.Open();
             string queryString = @"SELECT * FROM Usuario;";
@@ -40,5 +55,40 @@ public class UsuarioRepository
         }
 
         return usuarios;
+    }
+
+    public Usuario GetUsuario(int idUsuario){
+        Usuario usuarioEncontrado = new Usuario();
+        using(var connection = new SQLiteConnection(connectionString))
+        {
+            connection.Open();
+            string queryString = @"SELECT * FROM Usuario WHERE id = @idUsuario";
+            
+            var command = new SQLiteCommand(queryString, connection);
+            command.Parameters.Add(new SQLiteParameter("@idUsuario", idUsuario));
+            using(var reader = command.ExecuteReader())
+            {
+                if(reader.Read()){
+                    usuarioEncontrado.Id = Convert.ToInt32(reader["id"]);
+                    usuarioEncontrado.NombreUsuario = reader["nombre_de_usuario"].ToString();
+                }
+            }
+            connection.Close();
+        }
+
+        return usuarioEncontrado;
+    }
+
+    public void EliminarUsuario(int idUsuario){
+        using(var connection = new SQLiteConnection(connectionString))
+        {
+            connection.Open();
+            string queryString = @"DELETE FROM Usuario WHERE id = @idUsuario;";
+            var command = new SQLiteCommand(queryString, connection);
+            command.Parameters.Add(new SQLiteParameter("@idUsuario", idUsuario));
+
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
     }
 }
