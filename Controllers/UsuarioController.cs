@@ -35,7 +35,7 @@ public class UsuarioController : ControllerBase
     [HttpPost("/api/usuario")]
     public ActionResult<string> CrearUsuario(Usuario nuevoUsuario){
         if(nuevoUsuario != null){
-            usuarioRepo.CrearNuevoUsuario(nuevoUsuario);
+            usuarioRepo.CrearUsuario(nuevoUsuario);
             return Ok("Se creo el usuario correctamente.");
         } else{
             return BadRequest("ERROR. No se pudo crear un nuevo usuario.");
