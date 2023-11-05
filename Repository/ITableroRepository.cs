@@ -5,7 +5,7 @@ public interface ITableroRepository
     void CrearTablero(Tablero nuevoTablero);
     void ModificarTablero(int idTablero, Tablero tableroModificar);
     List<Tablero> GetAllTableros();
-    Tablero GetTableroPorId(int idTablero);
+    Tablero GetTablero(int idTablero);
     List<Tablero> GetTablerosDeUsuario(int idUsuario);
     void EliminarTablero(int idTablero);
 }

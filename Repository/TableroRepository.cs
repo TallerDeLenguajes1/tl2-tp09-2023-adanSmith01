@@ -74,7 +74,7 @@ public class TableroRepository: ITableroRepository
         return tableros;
     }
 
-    public Tablero GetTableroPorId(int idTablero){
+    public Tablero GetTablero(int idTablero){
         Tablero tableroEncontrado = new Tablero();
         using(var connection = new SQLiteConnection(connectionString))
         {

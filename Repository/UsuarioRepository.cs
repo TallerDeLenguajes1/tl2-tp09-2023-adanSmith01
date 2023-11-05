@@ -6,7 +6,7 @@ public class UsuarioRepository: IUsuarioRepository
     private string connectionString = @"Data Source = DB/kanban.sqlite;Initial Catalog=Northwind;" + "Integrated Security=true";
 
 
-    public void CrearNuevoUsuario(Usuario nuevoUsuario){
+    public void CrearUsuario(Usuario nuevoUsuario){
         using(var connection = new SQLiteConnection(connectionString))
         {
             connection.Open();
