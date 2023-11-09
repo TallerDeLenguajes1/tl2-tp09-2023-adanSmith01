@@ -1,11 +1,11 @@
 using System.Data.SQLite;
 namespace tl2_tp09_2023_adanSmith01;
 
-public class TareaRepository
+public class TareaRepository: ITareaRepository
 {
     private string connectionString = @"Data Source = DB/kanban.sqlite;Initial Catalog=Northwind;" + "Integrated Security=true";
 
-    public void CrearTarea(Tarea nuevaTarea){
+    public void CrearTarea(int idTablero, Tarea nuevaTarea){
         using(var connection = new SQLiteConnection(connectionString))
         {
             connection.Open();
@@ -16,7 +16,7 @@ public class TareaRepository
             ";
             var command = new SQLiteCommand(queryString, connection);
 
-            command.Parameters.Add(new SQLiteParameter("@idTablero", nuevaTarea.IdTablero));
+            command.Parameters.Add(new SQLiteParameter("@idTablero", idTablero));
             command.Parameters.Add(new SQLiteParameter("@nombreTarea", nuevaTarea.Nombre));
             command.Parameters.Add(new SQLiteParameter("@estadoTarea", Convert.ToInt32(nuevaTarea.Estado)));
             command.Parameters.Add(new SQLiteParameter("@descripcionTarea", nuevaTarea.Descripcion));
@@ -28,6 +28,30 @@ public class TareaRepository
         }
     }
 
+    public void ModificarTarea(int idTarea, Tarea tareaAModificar){
+        using(var connection = new SQLiteConnection(connectionString))
+        {
+            connection.Open();
+            string queryString = @"
+            UPDATE Tarea 
+            SET id_tablero = @idTablero, nombre = @nombreNuevo, estado = @estadoNuevo, 
+            descripcion = @descripcionNueva, color = @colorNuevo, id_usuario_asignado = @idUsuarioAsignadoNuevo
+            WHERE id = @idTarea;";
+            var command = new SQLiteCommand(queryString, connection);
+
+            command.Parameters.Add(new SQLiteParameter("@idTablero", tareaAModificar.IdTablero));
+            command.Parameters.Add(new SQLiteParameter("@nombreNuevo", tareaAModificar.Nombre));
+            command.Parameters.Add(new SQLiteParameter("@estadoNuevo", Convert.ToInt32(tareaAModificar.Estado)));
+            command.Parameters.Add(new SQLiteParameter("@descripcionNueva", tareaAModificar.Descripcion));
+            command.Parameters.Add(new SQLiteParameter("@colorNuevo", tareaAModificar.Color));
+            command.Parameters.Add(new SQLiteParameter("@idUsuarioAsignadoNuevo", tareaAModificar.IdUsuarioAsignado));
+            command.Parameters.Add(new SQLiteParameter("@idTarea", idTarea));
+
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+    }
+    
     public void AsignarUsuarioATarea(int idUsuario, int idTarea){
         using(var connection = new SQLiteConnection(connectionString))
         {
@@ -127,6 +151,35 @@ public class TareaRepository
         }
 
         return tareasTablero;
+    }
+
+    public List<Tarea> GetTareasPorEstado(EstadoTarea estado){
+        List<Tarea> tareasEstado = new List<Tarea>();
+
+        using(var connection = new SQLiteConnection(connectionString))
+        {
+            connection.Open();
+            string queryString = @"SELECT * FROM Tarea WHERE estado = @estado";
+            var command = new SQLiteCommand(queryString, connection);
+            command.Parameters.Add(new SQLiteParameter("@estado", Convert.ToInt32(estado)));
+
+            using(var reader = command.ExecuteReader())
+            {
+                while(reader.Read()){
+                    Tarea tarea = new Tarea();
+                    tarea.Id = Convert.ToInt32(reader["id"]);
+                    tarea.IdTablero = Convert.ToInt32(reader["id_tablero"]);
+                    tarea.Nombre = reader["nombre"].ToString();
+                    tarea.Estado = (EstadoTarea) Convert.ToInt32(reader["estado"]);
+                    tarea.Descripcion = reader["descripcion"].ToString();
+                    tarea.Color = reader["color"].ToString();
+                    tarea.IdUsuarioAsignado = reader["id_usuario_asignado"] as int?; 
+                    tareasEstado.Add(tarea);
+                }
+            }
+            connection.Close();
+        }
+        return tareasEstado;
     }
 
     public void EliminarTarea(int idTarea){
