@@ -16,12 +16,7 @@ public class TableroController : ControllerBase
     [HttpGet("/api/tableros")]
     public ActionResult<IEnumerable<Tablero>> GetAll(){
         var tableros = tableroRepo.GetAllTableros();
-
-        if(tableros.Count != 0){
-            return Ok(tableros);
-        } else{
-            return BadRequest("No se registraron tableros de tareas de usuarios");
-        }
+        return Ok(tableros);
     }
 
     [HttpPost("/api/tablero")]

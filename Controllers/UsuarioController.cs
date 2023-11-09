@@ -16,20 +16,14 @@ public class UsuarioController : ControllerBase
     [HttpGet("/api/usuario")]
     public ActionResult<IEnumerable<Usuario>> GetUsuarios(){
         var usuarios = usuarioRepo.GetAllUsuarios();
-        if(usuarios.Count != 0) return Ok(usuarios);
-        else return BadRequest("No hay usuarios registrados");
+        return Ok(usuarios);
     }
 
     [HttpGet]
     [Route("/api/usuario/{id}")]
     public ActionResult<Usuario> GetUsuarioPorId(int id){
         var usuarioEncontrado = usuarioRepo.GetUsuario(id);
-
-        if(String.IsNullOrEmpty(usuarioEncontrado.NombreUsuario)){
-            return NotFound("Usuario no encontrado.");
-        }else{
-            return Ok(usuarioEncontrado);
-        }
+        return Ok(usuarioEncontrado);
     }
     
     [HttpPost("/api/usuario")]
